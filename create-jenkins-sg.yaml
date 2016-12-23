@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create Jenkins SecurityGroup"
+Parameters:
+  VpcId:
+    Description: "Id of VPC"
+    Type: String
+    AllowedPattern: "vpc-[a-z0-9]{8}"
+    ConstraintDescription: "Input format is vpc-xxxxxxxx"
+Resources:
+  JenkinsMasterSG:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: "Use Jenkins Master Instance SG"
+      Tags:
+        - Key: Name
+          Value: JenkinsMasterSG
+  ECSClusterJenkinsSlaveSG:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      VpcId:
+        Ref: VpcId
+      GroupDescription: "Use ECS Cluster Jenkins slave Instance SG"
+      Tags:
+        - Key: Name
+          Value: ECSClusterJenkinsSlaveSG
+  JenkinsMasterSGPolycy1:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+  JenkinsMasterSGPolycy2:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+  JenkinsMasterSGPolycy3:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 5000
+      ToPort: 5000
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - ECSClusterJenkinsSlaveSG
+          - GroupId
+  ECSClusterJenkinsSlaveSGPolycy1:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+  ECSClusterJenkinsSlaveSGPolycy2:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+  ECSClusterJenkinsSlaveSGPolycy2:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      FromPort: 5000
+      ToPort: 5000
+      SourceSecurityGroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+      GroupId:
+        "Fn::GetAtt":
+          - JenkinsMasterSG
+          - GroupId
+Outputs:
+  JenkinsMasterSecurityGroupId:
+    Value:
+      Ref: JenkinsMasterSG
+    Export:
+      Name: JenkinsMasterSG
+    Description: "Id of JenkinsMasterSG"
+  ECSClusterJenkinsSlaveSecurityGroupId:
+    Value:
+      Ref: ECSClusterJenkinsSlaveSG
+    Export:
+      Name: ECSClusterJenkinsSlaveSG
+    Description: "Id of ECSClusterJenkinsSlaveSG"

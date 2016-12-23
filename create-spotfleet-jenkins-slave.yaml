@@ -1,0 +1,65 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Cleate ECS cluster in spot fleet"
+Parameters:
+  MaxSpotPrise:
+    Description: "Max Price of Spot Instance"
+    Type: String
+  TargetCapacity:
+    Description: "Target Capacity of Spot Instance"
+    Type: String
+  InstanceType:
+    Description: "EC2 instance type of Spot Instance"
+    Default: "c3.large"
+    Type: String
+  SpotFleetAMI:
+    Description: "AMI of Spot Instance"
+    Type: String
+  IamFleetRoleARN:
+    Description: "IAM Role of Spot Instance"
+    Type: String
+  IamInstanceProfileARN:
+    Description: "IAM Instance Profile of Spot Instance"
+    Type: String
+  SubnetId:
+    Description: "Subnet Id of Spot Instance"
+    Type: String
+  KeyName:
+    Description: "Key Name"
+    Type: String
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+  SpotFleet:
+    Type: AWS::EC2::SpotFleet
+    Properties:
+      SpotFleetRequestConfigData:
+        IamFleetRole:
+          Ref: IamFleetRoleARN
+        SpotPrice:
+          Ref: MaxSpotPrise
+        TargetCapacity:
+          Ref: TargetCapacity
+        LaunchSpecifications:
+        - EbsOptimized: 'true'
+          InstanceType:
+            Ref: InstanceType
+          IamInstanceProfile:
+            Arn:
+              Ref: IamInstanceProfileARN
+          ImageId:
+            Ref: SpotFleetAMI
+          SubnetId:
+            Ref: SubnetId
+          Monitoring:
+            Enabled: 'true'
+          SecurityGroups:
+            - GroupId: !ImportValue ECSClusterJenkinsSlaveSG
+          KeyName:
+            Ref: KeyName
+          UserData:
+            Fn::Base64:
+              !Sub |
+                #!/bin/bash
+                yum update -y
+                yum install -y aws-cli
+                echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config

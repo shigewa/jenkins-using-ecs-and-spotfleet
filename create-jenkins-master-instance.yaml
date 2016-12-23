@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Cleate Jenkins master Instance."
+Parameters:
+  VpcId:
+    Type: String
+    Description: "VpcId of your existing Virtual Private Cloud (VPC)"
+  SubnetId:
+    Type: String
+    Description: "SubnetId in your Virtual Private Cloud (VPC)"
+  KeyName:
+    Description: "Key Name"
+    Type: String
+  InstanceType:
+    Description: "EC2 instance type for Jenkins"
+    Default: "t2.micro"
+    Type: String
+  AmiId:
+    Description: "EC2 instance AMI"
+    Type: String
+  IamInstanceProfileARN:
+    Description: "IAM Instance Profile of Spot Instance"
+    Type: String
+Resources:
+  JenkinsMasterInstance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId:
+        Ref: AmiId
+      InstanceType:
+        Ref: InstanceType
+      SubnetId:
+        Ref: SubnetId
+      SecurityGroupIds:
+        - !ImportValue JenkinsMasterSG
+      KeyName:
+        Ref: KeyName
+      Tags:
+        - Key: Name
+          Value: "Jenkins_Master_Instance"
+      IamInstanceProfile:
+        Ref:
+      UserData:
+        Fn::Base64:
+          !Sub |
+            #! /bin/bash -v
+            yum -y update
+            wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo
+            rpm --import https://jenkins-ci.org/redhat/jenkins-ci.org.key
+            # Install packages"
+            yum -y install jenkins
+            service jenkins start
+            chkconfig jenkins on

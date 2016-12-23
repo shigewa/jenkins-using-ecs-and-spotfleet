@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create Spot Fleet Role"
+Resources:
+  SpotFleetIAMRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "spotfleet.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetRole
+      RoleName: "aws-ec2-spot-fleet-role"
+Outputs:
+  SpotFleetIAMRole:
+    Description: "IAMRole of Spot Fleet"
+    Value:
+      Ref: SpotFleetIAMRole
+    Export:
+      Name: SpotFleetIAMRole
