@@ -17,9 +17,6 @@ Parameters:
   IamFleetRoleARN:
     Description: "IAM Role of Spot Instance"
     Type: String
-  IamInstanceProfileARN:
-    Description: "IAM Instance Profile of Spot Instance"
-    Type: String
   SubnetId:
     Description: "Subnet Id of Spot Instance"
     Type: String
@@ -40,12 +37,11 @@ Resources:
         TargetCapacity:
           Ref: TargetCapacity
         LaunchSpecifications:
-        - EbsOptimized: 'true'
+        - EbsOptimized: 'false'
           InstanceType:
             Ref: InstanceType
           IamInstanceProfile:
-            Arn:
-              Ref: IamInstanceProfileARN
+            Arn: !ImportValue JenkinsInstanceProfileArn
           ImageId:
             Ref: SpotFleetAMI
           SubnetId:

@@ -31,3 +31,18 @@ Resources:
       Roles:
         -
           Ref: JenkinsRole
+Outputs:
+  JenkinsInstanceProfile:
+    Value:
+      Ref: JenkinsInstanceProfile
+    Export:
+      Name: JenkinsInstanceProfile
+    Description: "JenkinsInstanceProfile"
+  JenkinsInstanceProfileArn:
+    Value:
+      Fn::GetAtt:
+      - JenkinsInstanceProfile
+      - Arn
+    Export:
+      Name: JenkinsInstanceProfileArn
+    Description: "JenkinsInstanceProfileArn"
